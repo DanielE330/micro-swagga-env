@@ -1,4 +1,4 @@
-# Swagger Aggregator
+# micro-swagga-env
 
 Легковесный микросервис на FastAPI для объединения OpenAPI (Swagger) документации из разрозненных микросервисов в единый интерфейс. 
 
