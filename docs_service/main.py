@@ -23,9 +23,19 @@ def _parse_env() -> list[dict]:
         entry = entry.strip()
         if "=" not in entry or ":" not in entry:
             continue
-        addr, prefix = entry.rsplit("=", 1)
+        addr, rest = entry.rsplit("=", 1)
         host, port = addr.rsplit(":", 1)
-        result.append({"host": host.strip(), "port": int(port), "prefix": prefix.strip()})
+        if "|" in rest:
+            prefix, openapi_path = rest.split("|", 1)
+        else:
+            prefix = rest
+            openapi_path = "/openapi.json"
+        result.append({
+            "host": host.strip(),
+            "port": int(port),
+            "prefix": prefix.strip(),
+            "openapi_path": openapi_path.strip(),
+        })
     return result
 
 
@@ -40,7 +50,8 @@ async def _discover():
     async with httpx.AsyncClient(timeout=5.0) as client:
         async def fetch(svc):
             try:
-                r = await client.get(f"http://{svc['host']}:{svc['port']}/openapi.json")
+                url = f"http://{svc['host']}:{svc['port']}{svc['openapi_path']}"
+                r = await client.get(url)
                 if r.status_code == 200:
                     spec = r.json()
                     svc["spec"] = spec

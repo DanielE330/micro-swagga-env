@@ -1,0 +1,14 @@
+{
+  "name": "tags_service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "@hapi/hapi": "^21.3.0",
+    "@hapi/inert": "^7.1.0",
+    "@hapi/vision": "^7.0.3",
+    "hapi-swagger": "^17.2.1",
+    "joi": "^17.11.0",
+    "pg": "^8.11.3"
+  }
+}

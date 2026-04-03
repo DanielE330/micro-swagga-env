@@ -1,0 +1,307 @@
+services:
+  caddy:
+    image: caddy:2
+    ports:
+      - "${CADDY_HTTP_PORT:-8080}:8080"
+      - "${CADDY_HTTPS_PORT:-8443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - auth_service
+      - user_service
+      - docs_service
+      - products_service
+      - orders_service
+      - notifications_service
+      - reviews_service
+      - categories_service
+      - tags_service
+      - inventory_service
+      - shipping_service
+      - payments_service
+      - comments_service
+      - coupons_service
+      - analytics_service
+  
+  docs_service:
+    build: ./docs_service
+    expose:
+      - "8000"
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    
+
+  auth_service:
+    build: ./auth_service
+    labels:
+      - "docs.route=/auth"
+      - "docs.port=8002"
+    expose:
+      - "8002"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SERVICE_NAME=auth_service
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  user_service:
+    build: ./user_service
+    labels:
+      - "docs.route=/users"
+      - "docs.port=8001"
+    expose:
+      - "8001"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SERVICE_NAME=user_service
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  
+  products_service:
+    build: ./products_service
+    labels:
+      - "docs.route=/products"
+      - "docs.port=8080"
+    expose:
+      - "8080"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  orders_service:
+    build: ./orders_service
+    labels:
+      - "docs.route=/orders"
+      - "docs.port=3000"
+    expose:
+      - "3000"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── Flask-RESTX (Python) ───
+  notifications_service:
+    build: ./notifications_service
+    labels:
+      - "docs.route=/notifications"
+      - "docs.port=8003"
+    expose:
+      - "8003"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── Django REST Framework (Python) ───
+  reviews_service:
+    build: ./reviews_service
+    labels:
+      - "docs.route=/reviews"
+      - "docs.port=8004"
+    expose:
+      - "8004"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── NestJS (TypeScript) ───
+  categories_service:
+    build: ./categories_service
+    labels:
+      - "docs.route=/categories"
+      - "docs.port=3001"
+    expose:
+      - "3001"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── Hapi (JavaScript) ───
+  tags_service:
+    build: ./tags_service
+    labels:
+      - "docs.route=/tags"
+      - "docs.port=3002"
+    expose:
+      - "3002"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── Spring Boot (Java) ───
+  inventory_service:
+    build: ./inventory_service
+    labels:
+      - "docs.route=/inventory"
+      - "docs.port=8085"
+    expose:
+      - "8085"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── ASP.NET Core (C#) ───
+  shipping_service:
+    build: ./shipping_service
+    labels:
+      - "docs.route=/shipping"
+      - "docs.port=5000"
+    expose:
+      - "5000"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── Gin (Go) ───
+  payments_service:
+    build: ./payments_service
+    labels:
+      - "docs.route=/payments"
+      - "docs.port=8086"
+    expose:
+      - "8086"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── Grape (Ruby) ───
+  comments_service:
+    build: ./comments_service
+    labels:
+      - "docs.route=/comments"
+      - "docs.port=3003"
+      - "docs.openapi=/api/swagger_doc"
+    expose:
+      - "3003"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── Slim (PHP) ───
+  coupons_service:
+    build: ./coupons_service
+    labels:
+      - "docs.route=/coupons"
+      - "docs.port=8087"
+      - "docs.openapi=/api/doc.json"
+    expose:
+      - "8087"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ─── Axum / utoipa (Rust) ───
+  analytics_service:
+    build: ./analytics_service
+    labels:
+      - "docs.route=/analytics"
+      - "docs.port=8088"
+    expose:
+      - "8088"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${POSTGRES_EXTERNAL_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
